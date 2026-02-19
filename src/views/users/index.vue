@@ -2,7 +2,7 @@
 	<the-header>
 		<div class="head">
 			<div class="head__left">
-				<h1>Services</h1>
+				<h1>Пользователи</h1>
 			</div>
 			<div class="head__right">
 				<el-button type="primary" @click="handleCreate"> Добавить </el-button>
@@ -25,77 +25,57 @@
 			</template>
 
 			<template #actions="{ row }">
-				<Actions :row="row" @handle="handleAction" edit :moreActions="moreActions" />
+				<Actions :row="row" @handle="handleAction"  edit :moreActions="moreActions" />
 			</template>
 		</BaseDataTable>
 	</el-main>
-	<ServiceFormModal @success="reload" width="500px" v-model="modalVisible" :row="selectedRow" />
+	<UserFormModal v-model="modalVisible" width="500px" :row="selectedRow" @success="reload" />
 </template>
-<script setup lang="ts">
-import { ref } from "vue";
 
+<script setup lang="ts">
 import BaseDataTable from "@/components/BaseDataTable/index.vue";
 import TheHeader from "@/components/navigation/TheHeader.vue";
-import ServiceFormModal from "@/components/Modal/ServiceFormModal/index.vue";
-import Actions from "@/components/BaseDataTable/Actions.vue";
-import { merchantsApi } from "@/api/merchants.api";
-
-import { ElNotification } from "element-plus";
+import { usersApi } from "@/api/users.api";
 import { defaultDateTime } from "@/utils/date";
-import type { TableColumn } from "@/types/table";
-import { servicesApi } from "@/api/services.api";
-import { formatMinutesToHours, formatNumber } from "@/utils/number";
-
-const columns: TableColumn[] = [
+import { ref } from "vue";
+import UserFormModal from "@/components/Modal/UserFormModal/index.vue";
+import { ElNotification } from "element-plus";
+import Actions from "@/components/BaseDataTable/Actions.vue";
+const columns = [
 	{
 		prop: "name",
-		label: "Название",
+		label: "Name",
 		sortable: true,
-		showOverflowTooltip: true,
-		minWidth: "150",
 	},
 	{
-		prop: "base_price",
-		label: "Цена",
+		prop: "email",
+		label: "Email",
 		sortable: true,
-		formatter: formatNumber,
-		showOverflowTooltip: true,
-	},
-	{
-		prop: "base_duration_minutes",
-		label: "Длительность",
-		sortable: true,
-		formatter: formatMinutesToHours,
-		showOverflowTooltip: true,
 	},
 	{
 		prop: "created_at",
-		label: "Дата создания",
+		label: "Created",
 		sortable: true,
 		formatter: defaultDateTime,
-		showOverflowTooltip: true,
-		width: "250",
 	},
 	{
 		prop: "updated_at",
-		label: "Дата обновления",
+		label: "Updated",
 		sortable: true,
 		formatter: defaultDateTime,
-		showOverflowTooltip: true,
-		width: "250",
 	},
 ];
 const name = ref("");
 const moreActions = [
 	{
 		action: "active",
-		activeLabel: "Скрыть",
-		inactiveLabel: "Показать",
+		activeLabel: "Заблокировать",
+		inactiveLabel: "Разблокировать",
 	},
 ];
 
 async function fetchData(params: any) {
-	const response = await servicesApi.list(params);
+	const response = await usersApi.list(params);
 	return {
 		data: response.data,
 		total: response.meta?.total ?? 0,
@@ -107,6 +87,8 @@ const modalVisible = ref(false);
 const selectedRow = ref(null);
 
 function handleEdit(row: any) {
+	console.log(row);
+	
 	selectedRow.value = row;
 	modalVisible.value = true;
 }
@@ -116,8 +98,8 @@ function handleCreate() {
 	modalVisible.value = true;
 }
 
-const handleDelete = (row: any) => perform(() => servicesApi.delete(row.id), true);
-const handleActive = (row: any) => perform(() => servicesApi.activate(row.id), true);
+const handleDelete = (row: any) => perform(() => usersApi.delete(row.id), true);
+const handleActive = (row: any) => perform(() => usersApi.activate(row.id), true);
 
 const tableRef = ref<InstanceType<typeof BaseDataTable> | null>(null);
 function reload(forceReload = false) {
@@ -126,6 +108,8 @@ function reload(forceReload = false) {
 
 const handleAction = (value: any) => {
 	const { action, row } = value;
+	console.log(value);
+	
 	switch (action) {
 		case "edit":
 			handleEdit(row);
@@ -153,6 +137,7 @@ async function perform(action: () => Promise<any>, forceReload = false) {
 	}
 }
 </script>
+
 <style scoped>
 .head {
 	display: flex;

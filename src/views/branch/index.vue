@@ -2,7 +2,7 @@
 	<the-header>
 		<div class="head">
 			<div class="head__left">
-				<h1>Services</h1>
+				<h1>Branch</h1>
 			</div>
 			<div class="head__right">
 				<el-button type="primary" @click="handleCreate"> Добавить </el-button>
@@ -18,55 +18,40 @@
 						clearable
 						placeholder="Поиск по названию"
 						v-model="name"
-						@input="(val: any) => setFilter('name', 'like', val)"
+						@input="(val: any) => setFilter('branch_name', 'like', val)"
 						style="max-width: 250px; width: 100%"
 					/>
 				</div>
 			</template>
 
 			<template #actions="{ row }">
-				<Actions :row="row" @handle="handleAction" edit :moreActions="moreActions" />
+				<Actions :row="row" @handle="handleAction" remove="branch_name" edit :moreActions="moreActions" />
 			</template>
 		</BaseDataTable>
 	</el-main>
-	<ServiceFormModal @success="reload" width="500px" v-model="modalVisible" :row="selectedRow" />
+	<BranchFormModal @success="reload" width="500px" v-model="modalVisible" :row="selectedRow" />
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
 
 import BaseDataTable from "@/components/BaseDataTable/index.vue";
 import TheHeader from "@/components/navigation/TheHeader.vue";
-import ServiceFormModal from "@/components/Modal/ServiceFormModal/index.vue";
+import BranchFormModal from "@/components/Modal/BranchFormModal/index.vue";
 import Actions from "@/components/BaseDataTable/Actions.vue";
 import { merchantsApi } from "@/api/merchants.api";
 
 import { ElNotification } from "element-plus";
 import { defaultDateTime } from "@/utils/date";
 import type { TableColumn } from "@/types/table";
-import { servicesApi } from "@/api/services.api";
-import { formatMinutesToHours, formatNumber } from "@/utils/number";
+import { branchesApi } from "@/api/branches.api";
 
 const columns: TableColumn[] = [
 	{
-		prop: "name",
+		prop: "branch_name",
 		label: "Название",
 		sortable: true,
 		showOverflowTooltip: true,
 		minWidth: "150",
-	},
-	{
-		prop: "base_price",
-		label: "Цена",
-		sortable: true,
-		formatter: formatNumber,
-		showOverflowTooltip: true,
-	},
-	{
-		prop: "base_duration_minutes",
-		label: "Длительность",
-		sortable: true,
-		formatter: formatMinutesToHours,
-		showOverflowTooltip: true,
 	},
 	{
 		prop: "created_at",
@@ -89,13 +74,13 @@ const name = ref("");
 const moreActions = [
 	{
 		action: "active",
-		activeLabel: "Скрыть",
-		inactiveLabel: "Показать",
+		activeLabel: "Заблокировать",
+		inactiveLabel: "Разблокировать",
 	},
 ];
 
 async function fetchData(params: any) {
-	const response = await servicesApi.list(params);
+	const response = await branchesApi.list(params);
 	return {
 		data: response.data,
 		total: response.meta?.total ?? 0,
@@ -116,8 +101,8 @@ function handleCreate() {
 	modalVisible.value = true;
 }
 
-const handleDelete = (row: any) => perform(() => servicesApi.delete(row.id), true);
-const handleActive = (row: any) => perform(() => servicesApi.activate(row.id), true);
+const handleDelete = (row: any) => perform(() => branchesApi.delete(row.id), true);
+const handleActive = (row: any) => perform(() => branchesApi.activate(row.id), true);
 
 const tableRef = ref<InstanceType<typeof BaseDataTable> | null>(null);
 function reload(forceReload = false) {

@@ -19,6 +19,12 @@ export const menu: MenuItem[] = [
 		// access: { anyPerm: ["users.read"] },
 	},
 	{
+		label: "Филиалы",
+		to: { name: "branch.list" },
+		icon: "UserFilled",
+		// access: { anyPerm: ["users.read"] },
+	},
+	{
 		label: "Услуги",
 		to: { name: "services.list" },
 		icon: "UserFilled",

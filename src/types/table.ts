@@ -18,7 +18,9 @@ export type TableColumn<T = any> = {
 	prop: string;
 	label: string;
 	sortable?: boolean;
-	width?: string | number;
-	searchable?: boolean;
-	formatter?: (row: T) => string | null;
+	width?: string;
+	minWidth?: string;
+	showOverflowTooltip?: boolean;
+	formatter?: Function;
 };
+

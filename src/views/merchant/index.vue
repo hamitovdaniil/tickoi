@@ -11,77 +11,75 @@
 	</the-header>
 
 	<el-main>
-		<BaseDataTable ref="tableRef" :columns="columns" :fetcher="fetchUsers">
-			<!-- FILTERS -->
-			<!-- <template #filters="{ setFilter }">
-					<div class="filters">
-						<el-input
-							placeholder="Search name"
-							clearable
-							v-model="name"
-							@input="(val) => setFilter('name', 'like', val)"
-							style="width: 250px"
-						/>
-					</div>
-				</template> -->
+		<BaseDataTable ref="tableRef" :columns="columns" :fetcher="fetchData">
+			<template #filters="{ setFilter }">
+				<div class="filters">
+					<el-input
+						clearable
+						placeholder="Поиск по названию"
+						v-model="name"
+						@input="(val: any) => setFilter('merchant_name', 'like', val)"
+						style="max-width: 250px; width: 100%"
+					/>
+				</div>
+			</template>
 
-			<!-- ACTIONS -->
 			<template #actions="{ row }">
-				<Actions
-					:row="row"
-					@handle="handleAction"
-					remove="merchant_name"
-					edit
-					:moreActions="moreActions"
-				/>
+				<Actions :row="row" @handle="handleAction" edit :moreActions="moreActions" />
 			</template>
 		</BaseDataTable>
 	</el-main>
 	<MerchantFormModal @success="reload" width="500px" v-model="modalVisible" :row="selectedRow" />
 </template>
 <script setup lang="ts">
+import { ref } from "vue";
+
 import BaseDataTable from "@/components/BaseDataTable/index.vue";
 import TheHeader from "@/components/navigation/TheHeader.vue";
-import { usersApi } from "@/api/users.api";
-import { defaultDateTime } from "@/utils/date";
-import { ref } from "vue";
 import MerchantFormModal from "@/components/Modal/MerchantFormModal/index.vue";
-import { merchantsApi } from "@/api/merchants.api";
 import Actions from "@/components/BaseDataTable/Actions.vue";
+import { merchantsApi } from "@/api/merchants.api";
+
 import { ElNotification } from "element-plus";
-const columns = [
+import { defaultDateTime } from "@/utils/date";
+import type { TableColumn } from "@/types/table";
+
+const columns: TableColumn[] = [
 	{
 		prop: "merchant_name",
-		label: "Name",
+		label: "Название",
 		sortable: true,
+		showOverflowTooltip: true,
+		minWidth: "150",
 	},
 	{
 		prop: "created_at",
-		label: "Created",
+		label: "Дата создания",
 		sortable: true,
 		formatter: defaultDateTime,
+		showOverflowTooltip: true,
+		width: "250",
 	},
 	{
 		prop: "updated_at",
-		label: "Updated",
+		label: "Дата обновления",
 		sortable: true,
 		formatter: defaultDateTime,
+		showOverflowTooltip: true,
+		width: "250",
 	},
 ];
-
+const name = ref("");
 const moreActions = [
 	{
 		action: "active",
-		activeLabel: "Deactivate",
-		inactiveLabel: "Activate",
+		activeLabel: "Заблокировать",
+		inactiveLabel: "Разблокировать",
 	},
 ];
 
-/* ========================= FETCHER ========================= */
-
-async function fetchUsers(params: any) {
+async function fetchData(params: any) {
 	const response = await merchantsApi.list(params);
-
 	return {
 		data: response.data,
 		total: response.meta?.total ?? 0,
@@ -102,36 +100,12 @@ function handleCreate() {
 	modalVisible.value = true;
 }
 
-const handleActive = async (row: any) => {
-	try {
-		await merchantsApi.activate(row.id);
-	} catch (error) {
-		ElNotification({
-			title: "Ошибка",
-			message: "Произошла ошибка",
-			type: "error",
-		});
-	} finally {
-		reload();
-	}
-};
+const handleDelete = (row: any) => perform(() => merchantsApi.delete(row.id), true);
+const handleActive = (row: any) => perform(() => merchantsApi.activate(row.id), true);
 
-const handleDelete = async (row: any) => {
-	try {
-		await merchantsApi.delete(row.id);
-	} catch (error) {
-		ElNotification({
-			title: "Ошибка",
-			message: "Произошла ошибка",
-			type: "error",
-		});
-	} finally {
-		reload();
-	}
-};
-const tableRef = ref(null);
-function reload() {
-	tableRef.value?.reload?.();
+const tableRef = ref<InstanceType<typeof BaseDataTable> | null>(null);
+function reload(forceReload = false) {
+	tableRef.value?.reload?.(forceReload);
 }
 
 const handleAction = (value: any) => {
@@ -148,6 +122,20 @@ const handleAction = (value: any) => {
 			break;
 	}
 };
+
+async function perform(action: () => Promise<any>, forceReload = false) {
+	try {
+		await action();
+	} catch {
+		ElNotification({
+			title: "Ошибка",
+			message: "Произошла ошибка",
+			type: "error",
+		});
+	} finally {
+		reload(forceReload);
+	}
+}
 </script>
 <style scoped>
 .head {

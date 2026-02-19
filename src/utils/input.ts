@@ -1,19 +1,24 @@
-export const debounce = (func: Function, timeout = 300) => {
-	let timer: number;
-	return (...args: any[]) => {
-		clearTimeout(timer);
-		timer = setTimeout(() => {
-			func.apply(this, args);
-		}, timeout);
-	};
-};
+export function debounce<T extends (...args: any[]) => void>(func: T, delay = 300) {
+	let timer: ReturnType<typeof setTimeout> | null = null;
 
-export const throttle = (func: Function, timeout = 300) => {
-	let timer: number;
-	return (...args: any[]) => {
-		clearTimeout(timer);
+	return (...args: Parameters<T>) => {
+		if (timer) clearTimeout(timer);
+
 		timer = setTimeout(() => {
-			func.apply(this, args);
-		}, timeout);
+			func(...args);
+		}, delay);
 	};
-};
+}
+
+export function throttle<T extends (...args: any[]) => void>(func: T, delay = 300) {
+	let lastCall = 0;
+
+	return (...args: Parameters<T>) => {
+		const now = Date.now();
+
+		if (now - lastCall >= delay) {
+			lastCall = now;
+			func(...args);
+		}
+	};
+}

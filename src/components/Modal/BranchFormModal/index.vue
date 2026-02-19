@@ -13,8 +13,8 @@
 			ref="formRef"
 			@submit.prevent="handleSubmit"
 		>
-			<el-form-item label="Название" prop="merchant_name">
-				<el-input v-model="form.merchant_name" />
+			<el-form-item label="Название" prop="branch_name">
+				<el-input v-model="form.branch_name" />
 			</el-form-item>
 		</el-form>
 	</BaseModal>
@@ -26,6 +26,7 @@ import BaseModal from "@/components/Modal/BaseCrud.vue";
 import { usersApi } from "@/api/users.api";
 import { merchantsApi } from "@/api/merchants.api";
 import { ElNotification, type FormInstance, type FormItemContext } from "element-plus";
+import { branchesApi } from "@/api/branches.api";
 
 const props = defineProps<{
 	modelValue: boolean;
@@ -46,17 +47,17 @@ const formRef = ref<FormInstance>();
 const loading = ref(false);
 
 const form = ref({
-	merchant_name: "",
+	branch_name: "",
 });
 
 const rules = {
-	merchant_name: [{ required: true, message: "Обязательное поле", trigger: "blur" }],
+	branch_name: [{ required: true, message: "Обязательное поле", trigger: "blur" }],
 };
 
 /* ========================= INIT DATA ========================= */
 function resetForm() {
 	form.value = {
-		merchant_name: "",
+		branch_name: "",
 	};
 }
 watch(
@@ -64,7 +65,7 @@ watch(
 	(val) => {
 		if (val) {
 			form.value = {
-				merchant_name: val.merchant_name,
+				branch_name: val.branch_name,
 			};
 		} else {
 			resetForm();
@@ -90,9 +91,9 @@ async function handleSubmit() {
 	loading.value = true;
 	try {
 		if (isEdit.value) {
-			await merchantsApi.update(props.row.id, form.value);
+			await branchesApi.update(props.row.id, form.value);
 		} else {
-			await merchantsApi.create(form.value);
+			await branchesApi.create(form.value);
 		}
 
 		emit("success");

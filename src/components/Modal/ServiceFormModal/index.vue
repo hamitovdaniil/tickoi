@@ -13,8 +13,22 @@
 			ref="formRef"
 			@submit.prevent="handleSubmit"
 		>
-			<el-form-item label="Название" prop="merchant_name">
-				<el-input v-model="form.merchant_name" />
+			<el-form-item label="Название" prop="name">
+				<el-input v-model="form.name" />
+			</el-form-item>
+			<el-form-item label="Цена" prop="base_price">
+				<el-input
+					:formatter="(value: string) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')"
+					:parser="(value: string) => value.replace(/[^\d]/g, '')"
+					v-model="form.base_price"
+				/>
+			</el-form-item>
+			<el-form-item label="Длительность (мин)" prop="base_duration_minutes">
+				<el-input
+					:formatter="(value: string) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')"
+					:parser="(value: string) => value.replace(/[^\d]/g, '')"
+					v-model="form.base_duration_minutes"
+				/>
 			</el-form-item>
 		</el-form>
 	</BaseModal>
@@ -26,6 +40,7 @@ import BaseModal from "@/components/Modal/BaseCrud.vue";
 import { usersApi } from "@/api/users.api";
 import { merchantsApi } from "@/api/merchants.api";
 import { ElNotification, type FormInstance, type FormItemContext } from "element-plus";
+import { servicesApi } from "@/api/services.api";
 
 const props = defineProps<{
 	modelValue: boolean;
@@ -46,17 +61,23 @@ const formRef = ref<FormInstance>();
 const loading = ref(false);
 
 const form = ref({
-	merchant_name: "",
+	name: "",
+	base_price: null,
+	base_duration_minutes: null,
 });
 
 const rules = {
-	merchant_name: [{ required: true, message: "Обязательное поле", trigger: "blur" }],
+	name: [{ required: true, message: "Обязательное поле", trigger: "blur" }],
+	base_price: [{ required: true, message: "Обязательное поле", trigger: "blur" }],
+	base_duration_minutes: [{ required: true, message: "Обязательное поле", trigger: "blur" }],
 };
 
 /* ========================= INIT DATA ========================= */
 function resetForm() {
 	form.value = {
-		merchant_name: "",
+		name: "",
+		base_price: null,
+		base_duration_minutes: null,
 	};
 }
 watch(
@@ -64,7 +85,9 @@ watch(
 	(val) => {
 		if (val) {
 			form.value = {
-				merchant_name: val.merchant_name,
+				name: val.name,
+				base_price: val.base_price,
+				base_duration_minutes: val.base_duration_minutes,
 			};
 		} else {
 			resetForm();
@@ -90,9 +113,9 @@ async function handleSubmit() {
 	loading.value = true;
 	try {
 		if (isEdit.value) {
-			await merchantsApi.update(props.row.id, form.value);
+			await servicesApi.update(props.row.id, form.value);
 		} else {
-			await merchantsApi.create(form.value);
+			await servicesApi.create(form.value);
 		}
 
 		emit("success");

@@ -1,4 +1,4 @@
-import { http } from "./http";
+import { http } from "@/api/http";
 import type { IAuthResponse, IUser } from "@/types/user";
 export type LoginPayload = { email: string; password: string };
 

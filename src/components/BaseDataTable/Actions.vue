@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { EditPen, Delete, MoreFilled } from "@element-plus/icons-vue";
 import { ref } from "vue";
-const { row } = defineProps<{ row: any; moreActions?: any; edit: boolean; remove: any }>();
+const { row } = defineProps<{ row: any; moreActions?: any; edit: boolean; remove?: any }>();
 const emits = defineEmits(["handle"]);
 const handle = (action: string) => {
 	emits("handle", { action, row });
