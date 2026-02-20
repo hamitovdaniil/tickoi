@@ -13,9 +13,14 @@
 	>
 		<div class="aside__wrapper">
 			<div class="aside__header">
-				<span v-if="!isCollapsed || isMobile">TICKIO</span>
-				<span v-if="isCollapsed">T</span>
-				<button v-if="isMobile" class="aside__close" @click="closeDrawer">✕</button>
+				<div class="aside__header_logo">
+					<span v-if="!isCollapsed || isMobile">TICKIO</span>
+					<span v-if="isCollapsed">T</span>
+				</div>
+				<div class="aside__header_right">
+					<Lang v-if="!isCollapsed || isMobile" />
+					<button v-if="isMobile" class="aside__close" @click="closeDrawer">✕</button>
+				</div>
 			</div>
 			<el-scrollbar class="aside__scrollbar">
 				<el-menu router :default-active="activeRoute" :collapse="isCollapsed && !isMobile">
@@ -54,7 +59,9 @@
 			<div class="aside__foter">
 				<div class="aside__foter_me">
 					<template v-if="!isCollapsed">
-						<span class="aside__foter_me_name"> {{ user?.name ?? "Admin" }} </span>
+						<span class="aside__foter_me_name">
+							{{ user?.name ?? "Admin" }} ({{ user?.role.label ?? "Admin" }})
+						</span>
 						<span class="aside__foter_me_email"> {{ user?.email ?? "Admin" }} </span>
 					</template>
 					<template v-else>
@@ -84,7 +91,7 @@ import IconExit from "../Icons/IconExit.vue";
 import { useAuthStore } from "@/stores/auth";
 import type { IUser } from "@/types/user";
 import { useNavigationStore } from "@/stores/navigation";
-import { el } from "element-plus/es/locales.mjs";
+import Lang from "@/components/Lang/index.vue";
 const authStore = useAuthStore();
 const navigationStore = useNavigationStore();
 const user: ComputedRef<IUser | null> = computed(() => authStore.user);
@@ -185,6 +192,10 @@ const activeRoute = computed(() => route.name as string);
 		justify-content: space-between;
 		padding: 0 var(--aside-padding-x);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		&_right{
+			display: flex;
+			gap: 10px;
+		}
 	}
 	&__close {
 		background: none;

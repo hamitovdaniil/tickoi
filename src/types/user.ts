@@ -1,11 +1,12 @@
 export interface IUser {
+	active: boolean;
+	email: string;
 	id: number;
 	name: string;
-	email: string;
-	email_verified_at: Nullable<Date>;
-	role_id: number;
 	merchant_id: Nullable<number>;
+	role: Role;
 	created_at: Date;
+	email_verified_at: Nullable<Date>;
 	updated_at: Date;
 }
 

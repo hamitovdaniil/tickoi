@@ -21,6 +21,13 @@ export const routes: RouteRecordRaw[] = [
 				name: "merchants.list",
 			},
 			{
+				path: "merchant/users",
+				components: {
+					default: () => import("@/views/MerchantUsers/index.vue"),
+				},
+				name: "merchants.users.list",
+			},
+			{
 				path: "branch",
 				components: {
 					default: () => import("@/views/branch/index.vue"),

@@ -5,7 +5,7 @@
 				<h1>Пользователи</h1>
 			</div>
 			<div class="head__right">
-				<el-button type="primary" @click="handleCreate"> Добавить </el-button>
+				<HeadAddBtn @handle-click="handleCreate" />
 			</div>
 		</div>
 	</the-header>
@@ -25,7 +25,7 @@
 			</template>
 
 			<template #actions="{ row }">
-				<Actions :row="row" @handle="handleAction"  edit :moreActions="moreActions" />
+				<Actions :row="row" @handle="handleAction" edit :moreActions="moreActions" />
 			</template>
 		</BaseDataTable>
 	</el-main>
@@ -40,6 +40,7 @@ import { defaultDateTime } from "@/utils/date";
 import { ref } from "vue";
 import UserFormModal from "@/components/Modal/UserFormModal/index.vue";
 import { ElNotification } from "element-plus";
+import HeadAddBtn from "@/components/HeadAddBtn/index.vue";
 import Actions from "@/components/BaseDataTable/Actions.vue";
 const columns = [
 	{
@@ -50,6 +51,11 @@ const columns = [
 	{
 		prop: "email",
 		label: "Email",
+		sortable: true,
+	},
+	{
+		prop: "phone",
+		label: "Phone",
 		sortable: true,
 	},
 	{
@@ -88,7 +94,7 @@ const selectedRow = ref(null);
 
 function handleEdit(row: any) {
 	console.log(row);
-	
+
 	selectedRow.value = row;
 	modalVisible.value = true;
 }
@@ -109,7 +115,7 @@ function reload(forceReload = false) {
 const handleAction = (value: any) => {
 	const { action, row } = value;
 	console.log(value);
-	
+
 	switch (action) {
 		case "edit":
 			handleEdit(row);

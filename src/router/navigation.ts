@@ -6,18 +6,19 @@ export type MenuItem = {
 	children?: MenuItem[];
 };
 export const menu: MenuItem[] = [
-	{
-		label: "Пользователи",
-		to: { name: "users.list" },
-		icon: "UserFilled",
-		// access: { anyPerm: ["users.read"] },
-	},
-	{
-		label: "Мерчанты",
-		to: { name: "merchants.list" },
-		icon: "UserFilled",
-		// access: { anyPerm: ["users.read"] },
-	},
+	// {
+	// 	label: "Мерчанты",
+	// 	to: { name: "merchants.list" },
+	// 	icon: "UserFilled",
+	// 	// access: { anyPerm: ["users.read"] },
+	// },
+	// {
+	// 	label: "Пользователи",
+	// 	to: { name: "users.list" },
+	// 	icon: "UserFilled",
+	// 	// access: { anyPerm: ["users.read"] },
+	// },
+
 	{
 		label: "Филиалы",
 		to: { name: "branch.list" },
@@ -27,6 +28,12 @@ export const menu: MenuItem[] = [
 	{
 		label: "Услуги",
 		to: { name: "services.list" },
+		icon: "UserFilled",
+		// access: { anyPerm: ["users.read"] },
+	},
+	{
+		label: "Сотрудники",
+		to: { name: "merchants.users.list" },
 		icon: "UserFilled",
 		// access: { anyPerm: ["users.read"] },
 	},

@@ -1,16 +1,16 @@
 import type { TableColumnCtx } from "element-plus";
 
-export function formatNumber(row: any, column: TableColumnCtx, cellValue: any, index: number) {
+export function formatNumber(row?: any, column?: TableColumnCtx, cellValue?: any, index?: number) {
 	const num = Number(cellValue);
 
 	return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1 ");
 }
 
 export function formatMinutesToHours(
-	row: any,
-	column: TableColumnCtx,
-	cellValue: any,
-	index: number,
+	row?: any,
+	column?: TableColumnCtx,
+	cellValue?: any,
+	index?: number,
 ) {
 	const num = Number(cellValue);
 

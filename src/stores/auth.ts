@@ -14,8 +14,8 @@ export const useAuthStore = defineStore("auth", {
 
 	getters: {
 		isAuthed: (s) => !!s.token && !!s.user,
-		roles: (s) => s.user?.roles ?? [],
-		permissions: (s) => s.user?.permissions ?? [],
+		lore: (s) => s.user?.roles ?? [],
+		permissions: (s) => s.user?.role.permissions ?? [],
 	},
 
 	actions: {

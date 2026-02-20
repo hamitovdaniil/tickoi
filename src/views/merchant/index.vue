@@ -5,7 +5,7 @@
 				<h1>Merchant</h1>
 			</div>
 			<div class="head__right">
-				<el-button type="primary" @click="handleCreate"> Добавить </el-button>
+				<HeadAddBtn @handle-click="handleCreate" />
 			</div>
 		</div>
 	</the-header>
@@ -39,6 +39,7 @@ import TheHeader from "@/components/navigation/TheHeader.vue";
 import MerchantFormModal from "@/components/Modal/MerchantFormModal/index.vue";
 import Actions from "@/components/BaseDataTable/Actions.vue";
 import { merchantsApi } from "@/api/merchants.api";
+import HeadAddBtn from "@/components/HeadAddBtn/index.vue";
 
 import { ElNotification } from "element-plus";
 import { defaultDateTime } from "@/utils/date";

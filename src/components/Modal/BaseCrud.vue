@@ -2,7 +2,8 @@
 	<el-drawer
 		class="base-modal"
 		:model-value="modelValue"
-		:size="width"
+		:size="'100%'"
+		:style="{ 'max-width': width }"
 		@close="handleClose"
 		destroy-on-close
 	>

@@ -5,3 +5,18 @@ body {
 	font-family: "Montserrat";
 	font-size: 10px;
 }
+
+.branchSelect {
+	.el-select-dropdown__item {
+		&.is-disabled {
+			color: var(--el-color-danger);
+			background-color: var(--el-color-danger-light-9);
+		}
+	}
+}
+
+.myExpand {
+	&__item {
+		padding: 10px;
+	}
+}

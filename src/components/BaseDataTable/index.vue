@@ -19,6 +19,11 @@
 				@sort-change="handleSortChange"
 				:row-class-name="tableRowClassName"
 			>
+				<el-table-column type="expand" v-if="$slots.expand">
+					<template #default="props">
+						<slot name="expand" :row="props.row" :expanded="props.expanded" />
+					</template>
+				</el-table-column>
 				<el-table-column
 					v-for="col in columns"
 					:key="col.prop"

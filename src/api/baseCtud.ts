@@ -27,5 +27,10 @@ export function createCrudApi(baseUrl: string) {
 			const { data } = await http.delete<{ data: any }>(`${baseUrl}/${id}`);
 			return data;
 		},
+
+		async activate(id: number) {
+			const { data } = await http.get<{ data: any }>(`${baseUrl}/${id}/active`);
+			return data;
+		},
 	};
 }
