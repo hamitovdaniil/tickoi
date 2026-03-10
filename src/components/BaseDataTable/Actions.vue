@@ -23,7 +23,13 @@
 		</template>
 		<div class="col">
 			<el-button size="small" v-for="action in moreActions" @click="handleAction(action)">
-				{{ row[action.action] ? action.activeLabel : action.inactiveLabel }}
+				{{
+					action.activeLabel
+						? row[action.action]
+							? action.activeLabel
+							: action.inactiveLabel
+						: action.label
+				}}
 			</el-button>
 		</div>
 	</el-popover>
@@ -53,8 +59,10 @@ const handleAction = (action: any) => {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	gap: 4px;
 	.el-button {
 		width: 100%;
+		margin: 0;
 	}
 }
 </style>

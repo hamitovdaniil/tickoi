@@ -29,7 +29,7 @@
 					<el-button
 						type="primary"
 						:loading="auth.loading"
-						@click="submit"
+						native-type="submit"
 						style="width: 100%"
 					>
 						Войти

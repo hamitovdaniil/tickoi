@@ -119,7 +119,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { Delete, Edit } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
 
 import { servicesApi } from "@/api/services.api";
 import { servicesUsersApi } from "@/api/servicesUser.api";
@@ -146,15 +146,32 @@ const form = ref<any>({
 /* ---------------- FETCH ---------------- */
 
 async function fetchServices() {
-	const response = await servicesApi.list({ limit: 100, page: 1 });
-	services.value = response.data;
+	try {
+		const response = await servicesApi.list({ limit: 100, page: 1 });
+		services.value = response.data;
+	} catch (error) {
+		ElNotification({
+			title: "Ошибка",
+			message: "Произошла ошибка",
+			type: "error",
+		});
+	}
 }
 
 async function fetchUserServices() {
-	const response = await servicesUsersApi.list({
-		userId: props.row.id,
-	});
-	userServices.value = response.data;
+	try {
+		const response = await servicesUsersApi.list({
+			userId: props.row.id,
+		});
+		userServices.value = response.data;
+	} catch (error) {
+		ElNotification({
+			title: "Ошибка",
+			message: "Произошла ошибка",
+			type: "error",
+		});
+	}
+	userServices.value = [];
 }
 
 async function getServices() {
@@ -251,6 +268,12 @@ async function onSubmit() {
 		dialogVisible.value = false;
 
 		ElMessage.success("Сохранено");
+	} catch (error) {
+		ElNotification({
+			title: "Ошибка",
+			message: "Произошла ошибка",
+			type: "error",
+		});
 	} finally {
 		saving.value = false;
 	}
@@ -265,13 +288,21 @@ async function deleteRow(row: any) {
 
 	const next = userServices.value.filter((item: any) => item.id !== row.id);
 
-	await servicesUsersApi.create({
-		user_id: props.row.id,
-		services: buildPayload(next), // ⚠ ВАЖНО
-	});
+	try {
+		await servicesUsersApi.create({
+			user_id: props.row.id,
+			services: buildPayload(next), // ⚠ ВАЖНО
+		});
 
-	await fetchUserServices();
-	ElMessage.success("Удалено");
+		await fetchUserServices();
+		ElMessage.success("Удалено");
+	} catch (error) {
+		ElNotification({
+			title: "Ошибка",
+			message: "Произошла ошибка",
+			type: "error",
+		});
+	}
 }
 
 function resetDialog() {

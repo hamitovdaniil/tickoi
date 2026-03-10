@@ -52,6 +52,7 @@ import { merchantUsersApi } from "@/api/merchantUsers.api";
 import { useAuthStore } from "@/stores/auth";
 import HeadAddBtn from "@/components/HeadAddBtn/index.vue";
 import MerchantUserExpand from "@/components/TablesExpand/MerchantUser/index.vue";
+import { router } from "@/router";
 const authStore = useAuthStore();
 const user = computed(() => authStore.user);
 const columns = [
@@ -85,15 +86,33 @@ const moreActions = [
 		activeLabel: "Заблокировать",
 		inactiveLabel: "Разблокировать",
 	},
+	{
+		action: "timetable",
+		label: "График",
+	},
 ];
 
 async function fetchData(params: any) {
 	params.filters.merchant_id = user.value?.merchant_id;
-	const response = await merchantUsersApi.list(params);
+	try {
+		const response = await merchantUsersApi.list(params);
+		return {
+			data: response.data,
+			total: response.meta?.total ?? 0,
+			last_page: response.meta?.last_page ?? 0,
+		};
+	} catch {
+		ElNotification({
+			title: "Ошибка",
+			message: "Произошла ошибка",
+			type: "error",
+		});
+	}
+
 	return {
-		data: response.data,
-		total: response.meta?.total ?? 0,
-		last_page: response.meta?.last_page ?? 0,
+		data: [],
+		total: 0,
+		last_page: 0,
 	};
 }
 
@@ -133,6 +152,9 @@ const handleAction = (value: any) => {
 			break;
 		case "active":
 			handleActive(row);
+			break;
+		case "timetable":
+			router.push({ name: "merchants.users.timetable", params: { id: row.id } });
 			break;
 	}
 };

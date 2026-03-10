@@ -96,12 +96,20 @@ const moreActions = [
 ];
 
 async function fetchData(params: any) {
-	const response = await servicesApi.list(params);
-	return {
-		data: response.data,
-		total: response.meta?.total ?? 0,
-		last_page: response.meta?.last_page ?? 0,
-	};
+	try {
+		const response = await servicesApi.list(params);
+		return {
+			data: response.data,
+			total: response.meta?.total ?? 0,
+			last_page: response.meta?.last_page ?? 0,
+		};
+	} catch (error) {
+		ElNotification({
+			title: "Ошибка",
+			message: "Произошла ошибка",
+			type: "error",
+		});
+	}
 }
 
 const modalVisible = ref(false);

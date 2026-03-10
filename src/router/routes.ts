@@ -28,6 +28,13 @@ export const routes: RouteRecordRaw[] = [
 				name: "merchants.users.list",
 			},
 			{
+				path: "merchant/users/:id/timetable",
+				components: {
+					default: () => import("@/views/MerchantUsers/timetable.vue"),
+				},
+				name: "merchants.users.timetable",
+			},
+			{
 				path: "branch",
 				components: {
 					default: () => import("@/views/branch/index.vue"),
