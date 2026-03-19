@@ -3,8 +3,10 @@
 		v-model="visible"
 		title="Настройка расписания"
 		:loading="loading"
-		:width="width"
 		@submit="handleSubmit"
+		size="width"
+		resizable
+		modal-penetrable
 	>
 		<el-form
 			label-position="top"

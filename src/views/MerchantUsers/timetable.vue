@@ -10,7 +10,22 @@
 		</div>
 	</the-header>
 	<el-main class="timetable">
-		<timetable-add :employees="timeTable" :isSelected="modalVisible" @cellClick="cellClick" />
+		<div class="timetable__head">
+			<el-date-picker
+				:shortcuts="shortcuts"
+				v-model="currentMonth"
+				@change="getData"
+				format="MMMM, YYYY"
+				type="month"
+			>
+			</el-date-picker>
+		</div>
+		<timetable-add
+			:employees="timeTable"
+			:period="getMonthRange(currentMonth)"
+			:isSelected="modalVisible"
+			@cellClick="cellClick"
+		/>
 	</el-main>
 	<TimetableFormModal
 		:selected="data"
@@ -33,88 +48,12 @@ import { useRoute } from "vue-router";
 import { branchUsersApi } from "@/api/branchUsers.api";
 import { formatYMD } from "@/utils/date";
 const route = useRoute();
-const weekData = reactive([
-	{
-		date: "2025-12-08",
-		intervals: [
-			{ from: "09:00", to: "12:00" },
-			{ from: "13:00", to: "18:00" },
-		],
-		start_time: "09:00:00",
-		end_time: "18:00:00",
-		events: [
-			{
-				id: 1,
-				start: "10:00",
-				end: "11:00",
-				name: "Даниил",
-				phone: "+998942178213",
-			},
-		],
-	},
-	{
-		date: "2025-12-09",
-		intervals: [
-			{ from: "09:00", to: "12:00" },
-			{ from: "13:00", to: "18:00" },
-		],
-		start_time: "09:00:00",
-		end_time: "18:00:00",
-	},
-	{
-		date: "2025-12-10",
-		intervals: [
-			{ from: "09:00", to: "12:00" },
-			{ from: "13:00", to: "18:00" },
-		],
-		start_time: "09:00:00",
-		end_time: "18:00:00",
-		events: [
-			{
-				id: 2,
-				start: "13:00",
-				end: "15:00",
-				name: "Даниил",
-				phone: "+998942178213",
-			},
-		],
-	},
-	{
-		date: "2025-12-11",
-		intervals: [
-			{ from: "09:00", to: "12:00" },
-			{ from: "13:00", to: "18:00" },
-		],
-		start_time: "09:00:00",
-		end_time: "18:00:00",
-	},
-	{
-		date: "2025-12-12",
-		intervals: [
-			{ from: "09:00", to: "12:00" },
-			{ from: "13:00", to: "18:00" },
-		],
-		start_time: "09:00:00",
-		end_time: "18:00:00",
-	},
-	{
-		date: "2025-12-13",
-		intervals: [
-			{ from: "09:00", to: "12:00" },
-			{ from: "13:00", to: "18:00" },
-		],
-		start_time: "09:00:00",
-		end_time: "18:00:00",
-	},
-	{
-		date: "2025-12-14",
-		intervals: [{ from: "09:00", to: "09:00" }],
-		start_time: "09:00:00",
-		end_time: "18:00:00",
-	},
-]);
+
+const intervals = ref([]);
 const userId = Number(route.params.id);
 const user = ref(null);
+const currentMonth = ref(new Date());
+
 async function fetchUser() {
 	try {
 		const response = await usersApi.get(userId);
@@ -127,14 +66,17 @@ async function fetchUser() {
 		});
 	}
 }
+const shortcuts = [
+	{
+		text: "Сегодня",
+		value: new Date(),
+	},
+];
 fetchUser();
 const timeTable = ref();
 const getData = async () => {
 	try {
-		const from = formatYMD(new Date());
-		const afterMOnth = new Date();
-		afterMOnth.setMonth(afterMOnth.getMonth() + 1);
-		const to = formatYMD(afterMOnth);
+		const { from, to } = getMonthRange(currentMonth.value);
 		const res = await branchUsersApi.list({
 			branch_id: 4,
 			from: from,
@@ -146,6 +88,19 @@ const getData = async () => {
 	} catch (e) {
 		console.log(e);
 	}
+};
+const getMonthRange = (date: Date) => {
+	const year = date.getFullYear();
+	const month = date.getMonth();
+
+	const from = new Date(year, month, 1);
+
+	const to = new Date(year, month + 1, 0);
+
+	return {
+		from: formatYMD(from),
+		to: formatYMD(to),
+	};
 };
 function transformWorker(worker: any) {
 	return {
@@ -182,7 +137,7 @@ const data = ref();
 const cellClick = (item: { row: any; column: any; cell: any }) => {
 	modalVisible.value = true;
 	console.log(item);
-	
+
 	data.value = item;
 };
 </script>

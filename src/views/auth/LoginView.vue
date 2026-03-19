@@ -44,7 +44,7 @@
 import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import type { FormInstance } from "element-plus";
+import { ElNotification, type FormInstance } from "element-plus";
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -76,7 +76,23 @@ const formRef = ref<FormInstance>();
 const submit = async () => {
 	if (!formRef.value) return;
 	await formRef.value.validate();
-	await auth.login(form.email, form.password);
+	try {
+		await auth.login(form.email, form.password);
+	} catch (error) {
+		if (error.status === 401) {
+			ElNotification({
+				title: "Ошибка",
+				message: "Неверный логин или пароль",
+				type: "error",
+			});
+		} else {
+			ElNotification({
+				title: "Ошибка",
+				message: "Произошла ошибка",
+				type: "error",
+			});
+		}
+	}
 	const redirect = (route.query.redirect as string) || "/";
 	router.replace(redirect);
 };

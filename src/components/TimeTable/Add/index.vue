@@ -4,7 +4,7 @@
 		@cell-click="handleCellClick"
 		class="schuduleTable"
 		border
-		:height="'calc(100vh - 40px - 40px - 35px)'"
+		:height="'calc(100vh - 40px - 40px - 35px - 42px)'"
 		style="width: 100%"
 		table-layout="fixed"
 		row-key="key"
@@ -18,35 +18,38 @@
 			:resizable="false"
 			:key="date.key"
 			:label="date.label"
+			:class-name="getColumnClassName(date)"
 			width="40"
 		>
 			<template #header>
 				<span v-html="date.label"></span>
 			</template>
 			<template #default="{ row }">
-				<div
-					class="tile"
-					:class="[
-						getClass(row.schedule[date.key].type),
-						{ 'tile--added-new': clickedSell.includes(row.id) },
-					]"
-					v-if="row.schedule[date.key]"
-				>
-					<div class="tile__wrapper">
-						<span v-if="row.schedule[date.key].type === 1">
-							{{ row.schedule[date.key].name ?? "" }}
-						</span>
-						<span class="icon">
-							<component :is="getIcon(row.schedule[date.key].type)" />
-						</span>
+				<Transition name="scale">
+					<div
+						class="tile"
+						:class="[
+							getClass(row.schedule[date.key]?.type),
+							{ 'tile--added-new': clickedSell.includes(row.id) },
+						]"
+						v-if="row.schedule[date.key]"
+					>
+						<div class="tile__wrapper">
+							<span v-if="row.schedule[date.key].type === 1">
+								{{ row.schedule[date.key].name ?? "" }}
+							</span>
+							<span class="icon">
+								<component :is="getIcon(row.schedule[date.key].type)" />
+							</span>
+						</div>
 					</div>
-				</div>
+				</Transition>
 				<div
 					class="tile tile--new"
 					:class="[
 						{ 'tile--added-new': clickedSell.includes(generateUnic(row, date.key)) },
 					]"
-					v-else
+					v-if="!row.schedule[date.key]"
 				>
 					<div class="tile__wrapper">
 						<el-icon size="15"><CirclePlusFilled /></el-icon>
@@ -58,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, markRaw, watch } from "vue";
+import { ref, markRaw, watch, computed } from "vue";
 import { CirclePlusFilled } from "@element-plus/icons-vue";
 import IconSick from "@/components/TimeTable/Add/Icons/Sick.vue";
 import IconHoliday from "@/components/TimeTable/Add/Icons/Holiday.vue";
@@ -67,6 +70,7 @@ import IconAbsence from "@/components/TimeTable/Add/Icons/Absence.vue";
 const props = defineProps({
 	employees: { type: Array, required: true },
 	isSelected: { type: Boolean, required: true },
+	period: { type: Object, required: true },
 });
 watch(
 	() => props.isSelected,
@@ -76,15 +80,15 @@ watch(
 		}
 	},
 );
+
+const toDay = new Date();
+
 function getDatesForTwoMonths() {
 	const result: { key: string; label: string }[] = [];
 
 	const now = new Date();
-
-	const months = [
-		new Date(now.getFullYear(), now.getMonth(), 1),
-		new Date(now.getFullYear(), now.getMonth() + 1, 1),
-	];
+	const { from, to } = props.period;
+	const months = [new Date(from), new Date(to)];
 
 	months.forEach((monthDate) => {
 		const year = monthDate.getFullYear();
@@ -147,7 +151,7 @@ const getIcon = (type: number) => {
 			return markRaw(IconDayOff);
 	}
 };
-const dates = ref(getDatesForTwoMonths());
+const dates = computed(() => getDatesForTwoMonths());
 const emits = defineEmits(["cellClick"]);
 const clickedSell = ref<string[]>([]);
 const handleCellClick = (row: any, column: any, cell: HTMLTableCellElement, event: Event) => {
@@ -157,8 +161,40 @@ const handleCellClick = (row: any, column: any, cell: HTMLTableCellElement, even
 const generateUnic = (row: any, rawColumnKey: string): string => {
 	return `${row.id}-${rawColumnKey}`;
 };
+
+const getColumnClassName = (column: { key: string }) => {
+	if (!column?.key) return "";
+
+	const date = new Date(column.key);
+	const day = date.getDay(); // 0 = воскресенье, 6 = суббота
+
+	const today = new Date();
+
+	const isToday =
+		date.getFullYear() === today.getFullYear() &&
+		date.getMonth() === today.getMonth() &&
+		date.getDate() === today.getDate();
+
+	return [
+		isToday && "is-today",
+		day === 0 && "is-sunday",
+		day === 6 && "is-saturday",
+		(day === 0 || day === 6) && "is-weekend",
+	]
+		.filter(Boolean)
+		.join(" ");
+};
 </script>
 <style lang="scss">
+.scale-enter-active,
+.scale-leave-active {
+	transition: all 0.2s ease;
+}
+.scale-enter-from,
+.scale-leave-to {
+	opacity: 0;
+	transform: scale(0);
+}
 .schuduleTable {
 	&.el-table {
 		--table-head-height: 55px;
@@ -169,7 +205,17 @@ const generateUnic = (row: any, rawColumnKey: string): string => {
 			&__header {
 				.el-table__cell {
 					height: var(--table-head-height);
-
+					&.is-today {
+						background: var(--today-background);
+						color: var(--today-color);
+					}
+					&.is-weekend {
+						background: var(--weekend-background);
+						color: var(--weekend-color);
+					}
+					&.is-sunday {
+						border-right-color: var(--weekend-color);
+					}
 					.cell {
 						padding: 0;
 						font-size: var(--table-head-font-size);
@@ -181,6 +227,12 @@ const generateUnic = (row: any, rawColumnKey: string): string => {
 				.el-table__cell {
 					height: var(--table-cell-height);
 					padding: 0;
+					&.is-today {
+						background: var(--today-background);
+					}
+					&.is-sunday {
+						border-right-color: var(--weekend-color);
+					}
 					&.is-last-column {
 						.cell {
 							font-size: 1rem;
@@ -189,6 +241,7 @@ const generateUnic = (row: any, rawColumnKey: string): string => {
 							align-items: center;
 						}
 					}
+
 					.cell {
 						font-size: var(--table-cell-font-size);
 						text-align: center;
@@ -204,6 +257,7 @@ const generateUnic = (row: any, rawColumnKey: string): string => {
 							padding: 2px;
 							transition: 0.3s ease;
 							cursor: pointer;
+
 							&--work {
 								--tile-background: var(--tile--work-background);
 								--tile-color: var(--tile--work-color);

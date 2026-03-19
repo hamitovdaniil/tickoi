@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { authApi } from "@/api/auth.api";
 import { router } from "@/router";
+import { throwError } from "element-plus/es/utils/error.mjs";
 
 type User = Awaited<ReturnType<typeof authApi.me>>;
 
@@ -23,12 +24,10 @@ export const useAuthStore = defineStore("auth", {
 			this.loading = true;
 			try {
 				const res = await authApi.login({ email, password });
-				console.log(res, "vdsvsv");
-
 				this.token = res.token;
 				localStorage.setItem("token", res.token);
 				this.user = res.user;
-			} finally {
+			}  finally {
 				this.loading = false;
 			}
 		},

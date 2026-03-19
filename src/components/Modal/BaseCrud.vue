@@ -2,13 +2,23 @@
 	<el-drawer
 		class="base-modal"
 		:model-value="modelValue"
-		:size="'100%'"
-		:style="{ 'max-width': width }"
+		:size="size || '100%'"
 		@close="handleClose"
+		:style="width ? { 'max-width': width } : {}"
 		destroy-on-close
+		:modal="!modalPenetrable || false"
+		:modal-penetrable="modalPenetrable || false"
+		:resizable="resizable || false"
+		:direction="direction"
 	>
 		<template #header v-if="title">
 			<h1 class="base-modal__title">{{ title }}</h1>
+			<el-select size="small" style="width: 60px" v-model="direction">
+				<el-option label="Справа" value="rtl" />
+				<el-option label="Слева" value="ltr" />
+				<el-option label="Сверху" value="ttb" />
+				<el-option label="Снизу" value="btt" />
+			</el-select>
 		</template>
 		<div class="base-modal__body">
 			<slot />
@@ -27,15 +37,20 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
+
 defineProps<{
 	modelValue: boolean;
 	title: string;
 	loading?: boolean;
 	width?: string | number;
+	size?: string | number;
+	resizable?: boolean;
+	modalPenetrable?: boolean;
 }>();
 
 const emit = defineEmits(["update:modelValue", "submit"]);
-
+const direction = ref("rtl");
 function handleClose() {
 	emit("update:modelValue", false);
 }
