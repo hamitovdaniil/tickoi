@@ -1,11 +1,11 @@
 <template>
 	<el-table
-		:data="employees"
+		:data="employees || []"
 		@cell-click="handleCellClick"
 		class="schuduleTable"
-		border
 		:height="'calc(100vh - 40px - 40px - 35px - 42px)'"
 		style="width: 100%"
+		size="small"
 		table-layout="fixed"
 		row-key="key"
 	>
@@ -26,29 +26,23 @@
 			</template>
 			<template #default="{ row }">
 				<Transition name="scale">
-					<div
-						class="tile"
-						:class="[
-							getClass(row.schedule[date.key]?.type),
-							{ 'tile--added-new': clickedSell.includes(row.id) },
-						]"
-						v-if="row.schedule[date.key]"
-					>
+					<div class="tile" :class="getTileClasses(row, date.key)">
 						<div class="tile__wrapper">
-							<span v-if="row.schedule[date.key].type === 1">
+							<span v-if="row.schedule[date.key]?.type === 1">
 								{{ row.schedule[date.key].name ?? "" }}
 							</span>
-							<span class="icon">
-								<component :is="getIcon(row.schedule[date.key].type)" />
+							<span class="icon" v-if="getIcon(row.schedule[date.key]?.type)">
+								<component :is="getIcon(row.schedule[date.key]?.type)" />
+							</span>
+							<span class="icon" v-if="isEmpty(row, date.key)">
+								<el-icon size="15"><CirclePlusFilled /></el-icon>
 							</span>
 						</div>
 					</div>
 				</Transition>
 				<div
-					class="tile tile--new"
-					:class="[
-						{ 'tile--added-new': clickedSell.includes(generateUnic(row, date.key)) },
-					]"
+					class="tile"
+					:class="getTileClasses(row, date.key)"
 					v-if="!row.schedule[date.key]"
 				>
 					<div class="tile__wrapper">
@@ -67,47 +61,48 @@ import IconSick from "@/components/TimeTable/Add/Icons/Sick.vue";
 import IconHoliday from "@/components/TimeTable/Add/Icons/Holiday.vue";
 import IconDayOff from "@/components/TimeTable/Add/Icons/DayOff.vue";
 import IconAbsence from "@/components/TimeTable/Add/Icons/Absence.vue";
+import { useTimetableStore } from "@/stores/timetable";
+
+const timetableStore = useTimetableStore();
 const props = defineProps({
-	employees: { type: Array, required: true },
-	isSelected: { type: Boolean, required: true },
+	employees: { type: Array || null, required: false },
+	// isSelected: { type: Boolean, required: true },
 	period: { type: Object, required: true },
 });
-watch(
-	() => props.isSelected,
-	() => {
-		if (!props.isSelected) {
-			clickedSell.value = [];
-		}
-	},
-);
+
+// watch(
+// 	() => props.isSelected,
+// 	() => {
+// 		if (!props.isSelected) {
+// 			clickedSell.value = [];
+// 		}
+// 	},
+// );
 
 const toDay = new Date();
 
-function getDatesForTwoMonths() {
+function getDatesForMonth() {
 	const result: { key: string; label: string }[] = [];
 
-	const now = new Date();
-	const { from, to } = props.period;
-	const months = [new Date(from), new Date(to)];
+	const { from } = props.period;
+	const date = new Date(from);
 
-	months.forEach((monthDate) => {
-		const year = monthDate.getFullYear();
-		const month = monthDate.getMonth();
-		const daysInMonth = new Date(year, month + 1, 0).getDate();
+	const year = date.getFullYear();
+	const month = date.getMonth();
+	const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-		for (let day = 1; day <= daysInMonth; day++) {
-			const date = new Date(year, month, day);
+	for (let day = 1; day <= daysInMonth; day++) {
+		const d = new Date(year, month, day);
 
-			const iso = formatDate(date);
+		const iso = formatDate(d);
 
-			const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" }).toUpperCase();
+		const weekday = d.toLocaleDateString("ru-RU", { weekday: "short" }).toUpperCase();
 
-			result.push({
-				key: iso,
-				label: `${weekday} <br/> ${String(day).padStart(2, "0")}`,
-			});
-		}
-	});
+		result.push({
+			key: iso,
+			label: `${weekday} <br/> ${String(day).padStart(2, "0")}`,
+		});
+	}
 
 	return result;
 }
@@ -118,7 +113,24 @@ function formatDate(date: Date) {
 
 	return `${y}-${m}-${d}`;
 }
-const getClass = (type: number) => {
+
+function isSelected(rowId: number, date: string) {
+	return timetableStore.selectedDates.includes(date) && rowId == timetableStore.userId;
+}
+
+function isEmpty(row: any, date: string) {
+	return !row.schedule[date];
+}
+
+function isFilled(row: any, date: string) {
+	return !!row.schedule[date];
+}
+
+function isDirty(row: any, date: string) {
+	return clickedSell.value.includes(generateUnic(row, date));
+}
+
+function getTypeClass(type?: number) {
 	switch (type) {
 		case 1:
 			return "tile--work";
@@ -132,11 +144,33 @@ const getClass = (type: number) => {
 			return "tile--absence";
 		case 6:
 			return "tile--paid-dayOff";
-		case 7:
-			// new for added
-			return "tile--added-new";
+		default:
+			return "";
 	}
-};
+}
+
+function getTileClasses(row: any, date: string) {
+	const empty = isEmpty(row, date);
+	const filled = isFilled(row, date);
+	const selected = isSelected(row.id, date);
+	const dirty = isDirty(row, date);
+	const type = row.schedule[date]?.type;
+
+	return {
+		// base
+		"is-empty": empty,
+		"is-filled": filled,
+
+		// data
+		"is-dirty": dirty,
+
+		// interaction
+		"is-selected": selected,
+
+		// type
+		[getTypeClass(type)]: filled,
+	};
+}
 const getIcon = (type: number) => {
 	switch (type) {
 		case 2:
@@ -151,12 +185,18 @@ const getIcon = (type: number) => {
 			return markRaw(IconDayOff);
 	}
 };
-const dates = computed(() => getDatesForTwoMonths());
+const dates = computed(() => getDatesForMonth());
+console.log(dates);
+
 const emits = defineEmits(["cellClick"]);
 const clickedSell = ref<string[]>([]);
 const handleCellClick = (row: any, column: any, cell: HTMLTableCellElement, event: Event) => {
-	emits("cellClick", { row, column, cell });
-	clickedSell.value.push(generateUnic(row, column.rawColumnKey));
+	const date = column.rawColumnKey;
+
+	timetableStore.setUser(row.id);
+	timetableStore.toggleDate(date);
+
+	emits("cellClick");
 };
 const generateUnic = (row: any, rawColumnKey: string): string => {
 	return `${row.id}-${rawColumnKey}`;
@@ -197,7 +237,7 @@ const getColumnClassName = (column: { key: string }) => {
 }
 .schuduleTable {
 	&.el-table {
-		--table-head-height: 55px;
+		--table-head-height: 45px;
 		--table-cell-height: 55px;
 		--table-head-font-size: 10px;
 		--table-cell-font-size: 8px;
@@ -205,17 +245,40 @@ const getColumnClassName = (column: { key: string }) => {
 			&__header {
 				.el-table__cell {
 					height: var(--table-head-height);
+					font-weight: 600;
+					.cell {
+						line-height: 16px;
+					}
+					color: #222;
 					&.is-today {
-						background: var(--today-background);
 						color: var(--today-color);
+						font-weight: 600;
+						position: relative;
+						&::before {
+							content: "";
+							position: absolute;
+							top: 0;
+							left: 0;
+							right: 0;
+							height: 2px;
+							background: var(--today-color);
+						}
 					}
 					&.is-weekend {
-						background: var(--weekend-background);
-						color: var(--weekend-color);
+						color: var(--weekend-background);
+						// &::before {
+						// 	content: "";
+						// 	position: absolute;
+						// 	top: 0;
+						// 	left: 0;
+						// 	right: 0;
+						// 	height: 2px;
+						// 	background: var(--weekend-background);
+						// }
 					}
-					&.is-sunday {
-						border-right-color: var(--weekend-color);
-					}
+					// &.is-sunday {
+					// 	border-right-color: var(--weekend-color);
+					// }
 					.cell {
 						padding: 0;
 						font-size: var(--table-head-font-size);
@@ -227,12 +290,13 @@ const getColumnClassName = (column: { key: string }) => {
 				.el-table__cell {
 					height: var(--table-cell-height);
 					padding: 0;
+					border-right: 1px solid #ebeef5;
+
 					&.is-today {
-						background: var(--today-background);
+						position: relative;
+						background: rgba(236, 201, 27, 0.08); // ослабили
 					}
-					&.is-sunday {
-						border-right-color: var(--weekend-color);
-					}
+
 					&.is-last-column {
 						.cell {
 							font-size: 1rem;
@@ -245,7 +309,7 @@ const getColumnClassName = (column: { key: string }) => {
 					.cell {
 						font-size: var(--table-cell-font-size);
 						text-align: center;
-						font-weight: 600;
+						font-weight: 500;
 						line-height: normal;
 						padding: 0;
 						height: 100%;
@@ -257,7 +321,66 @@ const getColumnClassName = (column: { key: string }) => {
 							padding: 2px;
 							transition: 0.3s ease;
 							cursor: pointer;
+							&__wrapper {
+								width: 100%;
+								height: 100%;
+								border-radius: var(--tile-border-radius);
 
+								background: var(--tile-background, transparent);
+								color: var(--tile-color, inherit);
+								border: var(--tile-border, 1px solid transparent);
+
+								transition: 0.2s ease;
+								display: flex;
+								align-items: center;
+								justify-content: center;
+							}
+							&.is-selected {
+								.tile__wrapper {
+									outline: 2px solid var(--tile-selected-outline, #409eff);
+									outline-offset: -2px;
+								}
+								&:hover {
+									.tile__wrapper {
+										filter: none;
+									}
+								}
+							}
+							&.is-dirty {
+								.tile__wrapper {
+									border-style: dashed !important;
+								}
+							}
+							&.is-empty {
+								--tile-background: transparent;
+								--tile-border: 1px dashed transparent;
+								opacity: 0.3;
+								transition: 0s ease;
+								.icon {
+									opacity: 0;
+									.el-icon {
+										color: var(--tile--new-color);
+									}
+									svg {
+										fill: var(--tile--new-color);
+									}
+								}
+								&:hover {
+									opacity: 1;
+									.tile__wrapper {
+										background: var(--tile-empty-hover-bg);
+										border: var(--tile--new-border);
+									}
+									.icon {
+										opacity: 1;
+									}
+								}
+								&.is-selected {
+									.icon {
+										opacity: 0;
+									}
+								}
+							}
 							&--work {
 								--tile-background: var(--tile--work-background);
 								--tile-color: var(--tile--work-color);
@@ -307,47 +430,7 @@ const getColumnClassName = (column: { key: string }) => {
 									--tile-background: var(--tile--paid-dayOff-hover--background);
 								}
 							}
-							&--new {
-								--tile-background: var(--tile--new-background);
-								--tile-color: var(--tile--new-color);
-								--tile-border: var(--tile--new-border);
-								opacity: 0;
-								transition: 0.3s ease;
-								height: 100%;
-								&:hover {
-									opacity: 1;
-								}
-								.tile__wrapper {
-									display: flex;
-									justify-content: center;
-									align-items: center;
-								}
-							}
-							&--added-new {
-								--tile-background: var(--tile--new-background);
-								--tile-color: var(--tile--new-color);
-								--tile-border: var(--tile--new-border);
-								opacity: 1;
-								transition: 0.3s ease;
-								height: 100%;
 
-								.tile__wrapper {
-									display: flex;
-									justify-content: center;
-									align-items: center;
-								}
-							}
-							&__wrapper {
-								height: 100%;
-								width: 100%;
-								background: var(--tile-background);
-								padding: 4px;
-								color: var(--tile-color);
-								border: var(--tile-border);
-								border-radius: var(--tile-border-radius);
-								user-select: none;
-								overflow: hidden;
-							}
 							.icon {
 								display: flex;
 								justify-content: center;

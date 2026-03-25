@@ -1,40 +1,42 @@
 :root {
-    --tile--work-background: rgb(205, 244, 205);
-    --tile--work-color: #45a522;
-    --tile--work-hover--background: rgb(131, 231, 149);
-    --tile--work-border: 1px solid rgba(0, 0, 0, 0.1);
+	--tile--work-background: rgba(205, 244, 205, 0.4);
+	--tile--work-color: #45a522;
+	--tile--work-hover--background: rgba(205, 244, 205);
+	--tile--work-border: 1px solid rgba(205, 244, 205);
 
-    --tile--sick-background: rgb(214, 231, 255);
-    --tile--sick-color: rgb(64, 114, 240);
-    --tile--sick-border: 1px dashed var(--tile--sick-color);
-    --tile--sick-hover--background: transparent;
+	--tile--sick-background: rgb(214, 231, 255);
+	--tile--sick-color: rgb(64, 114, 240);
+	--tile--sick-border: 1px dashed var(--tile--sick-color);
+	--tile--sick-hover--background: transparent;
 
-    --tile--holiday-background: rgb(237, 237, 252);
-    --tile--holiday-color: rgb(130, 121, 252);
-    --tile--holiday-hover--background: transparent;
-    --tile--holiday-border: 1px dashed var(--tile--holiday-color);
+	--tile--holiday-background: rgb(237, 237, 252);
+	--tile--holiday-color: rgb(130, 121, 252);
+	--tile--holiday-hover--background: transparent;
+	--tile--holiday-border: 1px dashed var(--tile--holiday-color);
 
-    --tile--unpaid-dayOff-background: rgb(255, 242, 191);
-    --tile--unpaid-dayOff-color: rgb(255, 168, 0);
-    --tile--unpaid-dayOff-hover--background: transparent;
-    --tile--unpaid-dayOff-border: 1px dashed var(--tile--unpaid-dayOff-color);
+	--tile--unpaid-dayOff-background: rgb(255, 242, 191);
+	--tile--unpaid-dayOff-color: rgb(255, 168, 0);
+	--tile--unpaid-dayOff-hover--background: transparent;
+	--tile--unpaid-dayOff-border: 1px dashed var(--tile--unpaid-dayOff-color);
 
-    --tile--absence-background: rgb(254, 239, 239);
-    --tile--absence-color: rgb(249, 96, 101);
-    --tile--absence-hover--background: transparent;
-    --tile--absence-border: 1px dashed var(--tile--absence-color);
+	--tile--absence-background: rgb(254, 239, 239);
+	--tile--absence-color: rgb(249, 96, 101);
+	--tile--absence-hover--background: transparent;
+	--tile--absence-border: 1px dashed var(--tile--absence-color);
 
+	--tile--paid-dayOff-background: var(--tile--unpaid-dayOff-background);
+	--tile--paid-dayOff-color: var(--tile--unpaid-dayOff-color);
+	--tile--paid-dayOff-hover--background: var(--tile--unpaid-dayOff-hover--background);
+	--tile--paid-dayOff-border: 1px dashed var(--tile--paid-dayOff-color);
 
-    --tile--paid-dayOff-background: var(--tile--unpaid-dayOff-background);
-    --tile--paid-dayOff-color: var(--tile--unpaid-dayOff-color);
-    --tile--paid-dayOff-hover--background: var(--tile--unpaid-dayOff-hover--background);
-    --tile--paid-dayOff-border: 1px dashed var(--tile--paid-dayOff-color);
+	--tile--new-background: transparent;
+	--tile--new-color: #45a522;
+	--tile--new-hover--background: transparent;
+	--tile--new-border: 1px dashed var(--tile--new-color);
 
+	--tile-selected-outline: #409eff;
+	--tile-hover-overlay: brightness(0.95);
+	--tile-empty-hover-bg: #f5f7fa;
 
-    --tile--new-background: transparent;
-    --tile--new-color: #45a522;
-    --tile--new-hover--background: transparent;
-    --tile--new-border: 1px dashed var(--tile--new-color);
-
-    --tile-border-radius: 4px;
+	--tile-border-radius: 4px;
 }

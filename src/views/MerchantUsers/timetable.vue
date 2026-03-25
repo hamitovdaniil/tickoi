@@ -27,13 +27,7 @@
 			@cellClick="cellClick"
 		/>
 	</el-main>
-	<TimetableFormModal
-		:selected="data"
-		@success="reload"
-		width="500px"
-		v-model="modalVisible"
-		:row="selectedRow"
-	/>
+	<TimetableFormModal @success="reload" width="500px" v-model="modalVisible" :row="selectedRow" />
 </template>
 <script setup lang="ts">
 import { merchantUsersApi } from "@/api/merchantUsers.api";
@@ -74,6 +68,24 @@ const shortcuts = [
 ];
 fetchUser();
 const timeTable = ref();
+interface ISchedule {
+	date: string;
+	end_time: string;
+	id: number;
+	start_time: string;
+	type: number;
+	typeText: string;
+}
+interface IWorker {
+	id: number;
+	name: string;
+	schedule: ISchedule[];
+}
+interface ITimetable {
+	branch_name: string;
+	id: number;
+	users: IWorker[];
+}
 const getData = async () => {
 	try {
 		const { from, to } = getMonthRange(currentMonth.value);
@@ -82,7 +94,8 @@ const getData = async () => {
 			from: from,
 			to: to,
 		});
-		timeTable.value = res.data.users.map((item: any) => transformWorker(item));
+
+		timeTable.value = res.data?.users?.map((item: any) => transformWorker(item));
 
 		console.log(timeTable.value);
 	} catch (e) {
@@ -133,12 +146,8 @@ function handleCreate() {
 	modalVisible.value = true;
 }
 
-const data = ref();
 const cellClick = (item: { row: any; column: any; cell: any }) => {
 	modalVisible.value = true;
-	console.log(item);
-
-	data.value = item;
 };
 </script>
 <style lang="scss">

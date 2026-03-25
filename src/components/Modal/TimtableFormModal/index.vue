@@ -120,11 +120,13 @@ import IconHoliday from "@/components/TimeTable/Add/Icons/Holiday.vue";
 import IconDayOff from "@/components/TimeTable/Add/Icons/DayOff.vue";
 import IconAbsence from "@/components/TimeTable/Add/Icons/Absence.vue";
 import { branchUsersApi } from "@/api/branchUsers.api";
+import { useTimetableStore } from "@/stores/timetable";
+
+const timetableStore = useTimetableStore();
 const props = defineProps<{
 	modelValue: boolean;
 	row?: any | null;
 	width?: string | number;
-	selected?: any;
 }>();
 
 const templateOptions = [
@@ -241,7 +243,7 @@ const form = ref({
 	template: 1,
 	type: 1,
 	interval: 1,
-	day_of_week: [],
+	day_of_week: [] as any[],
 	start_time: "09:00",
 	end_time: "18:00",
 	break_time: [] as any[],
@@ -308,43 +310,37 @@ watch(
 		}
 	},
 );
+watch(
+	() => form.value.template,
+	(template) => {
+		if (template === 2) {
+			// WEEK режим
 
+			const days = timetableStore.selectedDates.map(getDayOfWeek);
+			console.log(days);
+
+			// убираем дубли
+			form.value.day_of_week = [...new Set(days)].sort((a, b) => a - b);
+
+			// якорная дата (первая)
+			// timetableStore.selectedDates = [timetableStore.selectedDates[0]];
+		}
+	},
+);
+function getDayOfWeek(date: string): number {
+	const day = new Date(date).getDay();
+
+	return day === 0 ? 7 : day;
+}
 /* ========================= SUBMIT ========================= */
 
 async function handleSubmit() {
 	if (!formRef.value) return;
 	await formRef.value.validate();
 	loading.value = true;
-	const breakTime = form.value.break_time.filter((i) => i.start_time && i.end_time);
-	const uniqueBreakTime = new Set(breakTime.map((i) => `${i.start_time}-${i.end_time}`));
-	const breakTimeArray = Array.from(uniqueBreakTime).map((i) => {
-		const [start_time, end_time] = i.split("-");
-		return {
-			start_time,
-			end_time,
-		};
-	});
 	try {
-		const payload = {
-			user_id: props.selected.row.id,
-			branch_id: 4,
+		const payload = timetableStore.buildPayload(form.value, 4);
 
-			template: form.value.template,
-
-			date: props.selected.column.rawColumnKey,
-
-			start_time: form.value.start_time,
-			end_time: form.value.end_time,
-
-			type: form.value.type,
-
-			day_of_week: form.value.template === 2 ? form.value.day_of_week : null,
-
-			interval: form.value.template === 2 ? form.value.interval : null,
-
-			break_time: form.value.type === 1 && breakTime.length ? breakTimeArray : null,
-		};
-		Object.keys(payload).forEach((key: any) => payload[key] === null && delete payload[key]);
 		await branchUsersApi.create(payload);
 
 		emit("success");
@@ -360,6 +356,7 @@ async function handleSubmit() {
 	} finally {
 		loading.value = false;
 		resetForm();
+		timetableStore.clearSelection();
 	}
 }
 </script>

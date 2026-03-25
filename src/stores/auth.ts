@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { authApi } from "@/api/auth.api";
 import { router } from "@/router";
-import { throwError } from "element-plus/es/utils/error.mjs";
+
 
 type User = Awaited<ReturnType<typeof authApi.me>>;
 
