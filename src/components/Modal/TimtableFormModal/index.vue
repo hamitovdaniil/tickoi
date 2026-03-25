@@ -408,13 +408,12 @@ async function handleSubmit() {
 }
 .time-row {
 	display: flex;
-	justify-content: center;
 	align-items: center;
 	gap: 5px;
 	width: 100%;
 	max-width: 100%;
 	.el-date-editor.el-input {
-		width: 100%;
+		width: 120px;
 	}
 }
 .breaks {
@@ -423,6 +422,9 @@ async function handleSubmit() {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 5px;
+	}
+	.el-date-editor.el-input {
+		width: 100px;
 	}
 }
 </style>
